@@ -1,0 +1,8 @@
+flask==1.1.4
+markupsafe==2.0.1
+flask-script
+flask-bootstrap
+flask-wtf
+flask-sqlalchemy
+SQLAlchemy==1.4
+flask-migrate==2.6.0
