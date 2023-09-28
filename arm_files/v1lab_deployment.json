@@ -1,0 +1,238 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "eastus"
+        },
+        "rgName": {
+            "type": "string",
+            "defaultValue": "myResourceGroup"
+        },
+        "vnetName": {
+            "type": "string",
+            "defaultValue": "myVnet"
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "mySubnet"
+        },
+        "nsgName": {
+            "type": "string",
+            "defaultValue": "myNsg"
+        },
+        "ruleName": {
+            "type": "string",
+            "defaultValue": "myNsgRule"
+        },
+        "ipAddresses": {
+            "type": "array",
+            "defaultValue": [
+                "4.71.171.82",
+                "99.155.67.149"
+            ]
+        },
+        "ports": {
+            "type": "string",
+            "defaultValue": "22,80"
+        },
+        "vmName": {
+            "type": "string",
+            "defaultValue": "myVm"
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_B1s"
+        },
+        "adminUsername": {
+            "type": "string",
+            "defaultValue": "myUsername"
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "defaultValue": "myPassword"
+        }
+    },
+    "variables": {
+        "vnetAddressPrefix": "10.0.0.0/16",
+        "subnetAddressPrefix": "10.0.0.0/24",
+        "sshKeyPath": "~/.ssh/id_rsa",
+        "imagePublisher": "Canonical",
+        "imageOffer": "UbuntuServer",
+        "imageSku": "18.04-LTS",
+        "nicName": "myNic",
+        "publicIpAddressName": "myPublicIpAddress"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2021-04-01",
+            "location": "[parameters('location')]",
+            "name": "[parameters('rgName')]",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2021-02-01",
+            "location": "[parameters('location')]",
+            "name": "[variables('vnetName')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnetAddressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetAddressPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2021-02-01",
+            "location": "[parameters('location')]",
+            "name": "[parameters('nsgName')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
+            ],
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "[parameters('ruleName')]",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "priority": 100,
+                            "sourceAddressPrefix": "[parameters('ipAddresses')[0]]",
+                            "sourcePortRange": "[parameters('ports')]",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('ports')]",
+                            "access": "Allow"
+                        }
+                    },
+                    {
+                        "name": "[concat(parameters('ruleName'), '-2')]",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "priority": 101,
+                            "sourceAddressPrefix": "[parameters('ipAddresses')[1]]",
+                            "sourcePortRange": "[parameters('ports')]",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('ports')]",
+                            "access": "Allow"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "location": "[parameters('location')]",
+            "name": "[variables('vmName')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('imageSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat(variables('vmName'), '-osdisk')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": true,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "[variables('sshKeyPath')].pub",
+                                    "keyData": "[concat(variables('sshKeyData'), '\n')]"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2021-02-01",
+            "location": "[parameters('location')]",
+            "name": "[variables('publicIpAddressName')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            ],
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('publicIpAddressName')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2021-02-01",
+            "location": "[parameters('location')]",
+            "name": "[variables('nicName')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpAddressName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '/subnets/', variables('subnetName'))]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "publicIpAddress": {
+            "type": "string",
+            "value": "[reference(variables('publicIpAddressName')).ipAddress]"
+        }
+    }
+}
