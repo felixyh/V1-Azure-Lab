@@ -1,0 +1,23 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "adminUsername": {
+        "value": "felixyh"
+      },
+      "userData": {
+        "value": "echo Data"
+      },
+      "dnsLabelPrefix": {
+        "value": "felixyh"
+      },
+      "adminPasswordOrKey": {
+        "reference": {
+          "keyVault": {
+            "id": "/subscriptions/6b892183-b95d-42e5-b659-fa2bef8f11f7/resourceGroups/felixRg/providers/Microsoft.KeyVault/vaults/felixyh-keyvault",
+          },
+          "secretName": "felixyh-ssh"
+        }
+      }
+    }
+  }

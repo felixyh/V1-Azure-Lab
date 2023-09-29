@@ -1,0 +1,18 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "keyVaultName": {
+        "value": "felixyh-keyvault"
+      },
+      "objectId": {
+        "value": "e4c2fa91-750c-49e4-b7cc-7cd494eb53b4"
+      },
+      "secretName": {
+        "value": "felixyh-ssh"
+      },
+      "secretValue": {
+        "value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCc237pPO4VjuqIkP9F/ZAjqccKh9QLD58T1JenW8a941VrsMmuDUwjSYTW+ThV873M1MzQdVcH/dT6cLj1eqnfRTKux7JGgKNlTRakyl/oa187mIxMa80cITWG8h6vFkuXfz+YMLNCYHzCWxgKKh+HBO+BeyD/SXRjKsqSLOTOPxY1C+K5u3EwaYT4V92k7Pq5N8loAxXud4DKxAAcnWhOGuZ7Nm7R0CGltuo1es9Xlx7jkfRj2Nfg2OGFdxYNQ0my1SHWRFGLIFJYiJUXcNXW/bBTijET0MHnPiXJpTWdgBFwI5gFAe6CTXCskmvgBlFA9IdSIkDKPodaKC4aWtk9"
+      }
+    }
+  }
