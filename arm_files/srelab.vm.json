@@ -252,6 +252,7 @@
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
                 "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('windowsVMNames'), copyIndex(), '-pip'))]"
             ],
             "copy": {
