@@ -17,7 +17,7 @@
       },
       "enabledForDeployment": {
         "type": "bool",
-        "defaultValue": false,
+        "defaultValue": true,
         "metadata": {
           "description": "Specifies whether Azure Virtual Machines are permitted to retrieve certificates stored as secrets from the key vault."
         }
@@ -31,7 +31,7 @@
       },
       "enabledForTemplateDeployment": {
         "type": "bool",
-        "defaultValue": false,
+        "defaultValue": true,
         "metadata": {
           "description": "Specifies whether Azure Resource Manager is permitted to retrieve secrets from the key vault."
         }
@@ -78,13 +78,25 @@
           "description": "Specifies whether the key vault is a standard vault or a premium vault."
         }
       },
-      "secretName": {
+      "linuxSecretName": {
         "type": "string",
         "metadata": {
           "description": "Specifies the name of the secret that you want to create."
         }
       },
-      "secretValue": {
+      "linuxSecretValue": {
+        "type": "securestring",
+        "metadata": {
+          "description": "Specifies the value of the secret that you want to create."
+        }
+      },
+      "windowsSecretName": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies the name of the secret that you want to create."
+        }
+      },
+      "windowsSecretValue": {
         "type": "securestring",
         "metadata": {
           "description": "Specifies the value of the secret that you want to create."
@@ -127,9 +139,20 @@
       {
         "type": "Microsoft.KeyVault/vaults/secrets",
         "apiVersion": "2021-11-01-preview",
-        "name": "[format('{0}/{1}', parameters('keyVaultName'), parameters('secretName'))]",
+        "name": "[format('{0}/{1}', parameters('keyVaultName'), parameters('linuxSecretName'))]",
         "properties": {
-          "value": "[parameters('secretValue')]"
+          "value": "[parameters('linuxSecretValue')]"
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+        ]
+      },
+      {
+        "type": "Microsoft.KeyVault/vaults/secrets",
+        "apiVersion": "2021-11-01-preview",
+        "name": "[format('{0}/{1}', parameters('keyVaultName'), parameters('windowsSecretName'))]",
+        "properties": {
+          "value": "[parameters('windowsSecretValue')]"
         },
         "dependsOn": [
           "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
@@ -141,9 +164,13 @@
         "type": "string",
         "value": "[reference(parameters('keyVaultName')).vaultUri]"
       },
-      "secretName": {
+      "linuxSecretName": {
         "type": "string",
-        "value": "[reference(parameters('secretName')).secretUri]"
+        "value": "[reference(parameters('linuxSecretName')).secretUri]"
+      },
+      "windowsSecretName": {
+        "type": "string",
+        "value": "[reference(parameters('windowsSecretName')).secretUri]"
       }
     }
   }
