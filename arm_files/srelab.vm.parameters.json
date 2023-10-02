@@ -1,0 +1,53 @@
+{
+    "resourceGroupName": {
+        "value": "test-env-rg"
+    },
+    "location": {
+        "value": "eastus"
+    },
+    "vnetName": {
+        "value": "test-env-vnet"
+    },
+    "subnetName": {
+        "value": "test-env-subnet"
+    },
+    "subnetPrefix": {
+        "value": "10.0.1.0/24"
+    },
+    "nsgName": {
+        "value": "test-env-nsg"
+    },
+    "numberOfWindowsVMs": {
+        "value": 2
+    },
+    "numberOfLinuxVMs": {
+        "value": 2
+    },
+    "vmSize": {
+        "value": "Standard_B2s"
+    },
+    "windowsAdminUsername": {
+        "value": "adminuser"
+    },
+    "windowsAdminPassword": {
+        "value": "adminpassword1"
+    },
+    "linuxAdminUsername": {
+        "value": "adminuser"
+    },
+    "linuxAdminPassword": {
+        "value": "adminpassword2"
+    },
+    "rdpSourceIPAddresses": {
+        "value": [
+            "4.71.171.82",
+            "99.155.67.149"
+        ]
+    },
+    "sshSourceIPAddresses": {
+        "value": [
+            "4.71.171.82",
+            "99.155.67.149"
+        ]
+    }
+}

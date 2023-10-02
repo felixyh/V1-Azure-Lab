@@ -1,0 +1,83 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the resource group."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the locaion"
+            },
+            "defaultValue": "eastus"
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('resourceGroupName')]",
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2022-09-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "tags": {}
+        },
+        {
+            "name": "felixtestarmNsDeployment1",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "resourceGroup": "[parameters('resourceGroupName')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/resourceGroups/', parameters('resourceGroupName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "variables": {},
+                    "resources": [
+                        {
+                            "name": "virtualNetwork1",
+                            "type": "Microsoft.Network/virtualNetworks",
+                            "apiVersion": "2023-04-01",
+                            "location": "[parameters('location')]",
+                            "tags": {
+                                "displayName": "virtualNetwork1"
+                            },
+                            "properties": {
+                                "addressSpace": {
+                                    "addressPrefixes": [
+                                        "10.0.0.0/16"
+                                    ]
+                                },
+                                "subnets": [
+                                    {
+                                        "name": "Subnet-1",
+                                        "properties": {
+                                            "addressPrefix": "10.0.0.0/24"
+                                        }
+                                    },
+                                    {
+                                        "name": "Subnet-2",
+                                        "properties": {
+                                            "addressPrefix": "10.0.1.0/24"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        }
+
+    ],
+    "outputs": {}
+}
