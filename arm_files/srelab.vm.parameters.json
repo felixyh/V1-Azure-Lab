@@ -45,18 +45,11 @@
                 "secretName": "felixyh-ssh"
               }
         },
-        "rdpSourceIPAddresses": {
-            "value": [
-                "4.71.171.82",
-                "99.155.67.149"
-            ]
-        },
         "sshSourceIPAddresses": {
-            "value": [
-                "4.71.171.82",
-                "99.155.67.149"
-            ]
+            "value": ["4.71.171.82" , "99.155.67.149"]
+        },
+        "rdpSourceIPAddresses": {
+            "value": ["4.71.171.82" , "99.155.67.149"]
         }
-
     }  
 }

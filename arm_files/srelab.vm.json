@@ -102,7 +102,8 @@
     },
     "variables": {
         "vnetAddressPrefix": "10.0.0.0/16",
-        "nsgRulePriority": 1000,
+        "rdpRulePriority": 1000,
+        "sshRulePriority": 1200,
         "rdpRuleName": "allowrdp",
         "rdpRuleProtocol": "Tcp",
         "rdpRulePortRange": "3389",
@@ -160,37 +161,56 @@
             "apiVersion": "2019-08-01",
             "name": "[parameters('nsgName')]",
             "location": "[parameters('location')]",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('nsgName'), '/',concat(variables('rdpRuleName'), copyIndex(), '-rule'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+            ],
+            "copy": {
+                "name": "sourceaddressrdp",
+                "count": "[length(parameters('rdpSourceIPAddresses'))]"
+            },
             "properties": {
-                "securityRules": [
-                    {
-                        "name": "[variables('rdpRuleName')]",
-                        "location": "[parameters('location')]",
-                        "properties": {
-                            "priority": "[variables('nsgRulePriority')]",
-                            "protocol": "[variables('rdpRuleProtocol')]",
-                            "access": "Allow",
-                            "direction": "Inbound",
-                            "sourceAddressPrefixes": "[parameters('rdpSourceIPAddresses')]",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*",
-                            "destinationPortRange": "[variables('rdpRulePortRange')]"
-                        }
-                    },
-                    {
-                        "name": "[variables('sshRuleName')]",
-                        "location": "[parameters('location')]",
-                        "properties": {
-                            "priority": "[add(variables('nsgRulePriority'), 1)]",
-                            "protocol": "[variables('sshRuleProtocol')]",
-                            "access": "Allow",
-                            "direction": "Inbound",
-                            "sourceAddressPrefixes": "[parameters('sshSourceIPAddresses')]",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*",
-                            "destinationPortRange": "[variables('sshRulePortRange')]"
-                        }
-                    }
-                ]
+                "priority": "[add(variables('rdpRulePriority'), copyIndex())]",
+                "protocol": "[variables('rdpRuleProtocol')]",
+                "access": "Allow",
+                "direction": "Inbound",
+                "sourceAddressPrefixes": [
+                    "[concat(parameters('rdpSourceIPAddresses')[copyIndex()])]"
+                ],
+                "sourcePortRange": "*",
+                "destinationAddressPrefix": "*",
+                "destinationPortRange": "[variables('rdpRulePortRange')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(parameters('nsgName'), '/',concat(variables('sshRuleName'), copyIndex(), '-rule'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+            ],
+            "copy": {
+                "name": "sourceaddressssh",
+                "count": "[length(parameters('sshSourceIPAddresses'))]"
+            },
+            "properties": {
+                "priority": "[add(variables('sshRulePriority'), copyIndex())]",
+                "protocol": "[variables('sshRuleProtocol')]",
+                "access": "Allow",
+                "direction": "Inbound",
+                "sourceAddressPrefixes": [
+                    "[concat(parameters('sshSourceIPAddresses')[copyIndex()])]"
+                ],
+                "sourcePortRange": "*",
+                "destinationAddressPrefix": "*",
+                "destinationPortRange": "[variables('sshRulePortRange')]"
             }
         },
         {
@@ -205,7 +225,7 @@
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat('felixwin', copyIndex(), 'sre')]"
+                    "domainNameLabel": "[concat('felixwin', copyIndex(), 'vm')]"
                 }
             }
         },
@@ -221,7 +241,7 @@
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat('felixlin', copyIndex(), 'sre')]"
+                    "domainNameLabel": "[concat('felixlin', copyIndex(), 'vm')]"
                 }
             }
         },
@@ -367,7 +387,7 @@
                         }
                     ]
                 }
-            }
+            }           
         }
     ]
 }
