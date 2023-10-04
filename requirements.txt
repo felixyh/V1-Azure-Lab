@@ -1,4 +1,4 @@
-flask==1.1.4
+flask==2.0.1
 markupsafe==2.0.1
 flask-script
 flask-bootstrap
@@ -6,3 +6,10 @@ flask-wtf
 flask-sqlalchemy
 SQLAlchemy==1.4
 flask-migrate==2.6.0
+azure-mgmt-compute==21.0.0
+azure-mgmt-resource==19.0.0
+azure-common==1.1.27
+azure-identity==1.6.0
+python-dotenv==0.19.1
+msrestazure==0.6.4
+azure-core==1.29.4

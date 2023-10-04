@@ -1,0 +1,394 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the virtual network."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the subnet."
+            }
+        },
+        "subnetPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Prefix for the subnet."
+            }
+        },
+        "nsgName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the network security group."
+            }
+        },
+        "numberOfWindowsVMs": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of Windows virtual machines to deploy."
+            }
+        },
+        "numberOfLinuxVMs": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of Linux virtual machines to deploy."
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_B2s",
+            "metadata": {
+                "description": "Size of virtual machine."
+            }
+        },
+        "windowsAdminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Admin username for Windows virtual machines."
+            }
+        },
+        "windowsAdminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Admin password for Windows virtual machines."
+            }
+        },
+        "linuxAdminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Admin username for Linux virtual machines."
+            }
+        },
+        "linuxAdminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Admin password for Linux virtual machines."
+            }
+        },
+        "rdpSourceIPAddresses": {
+            "type": "array",
+            "metadata": {
+                "description": "List of source IP addresses that are allowed to access RDP."
+            }
+        },
+        "sshSourceIPAddresses": {
+            "type": "array",
+            "metadata": {
+                "description": "List of source IP addresses that are allowed to access SSH."
+            }
+        },
+        "authenticationType": {
+            "type": "string",
+            "defaultValue": "password",
+            "allowedValues": [
+            "sshPublicKey",
+            "password"
+            ],
+            "metadata": {
+            "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+            }
+        }
+    },
+    "variables": {
+        "vnetAddressPrefix": "10.0.0.0/16",
+        "rdpRulePriority": 1000,
+        "sshRulePriority": 1200,
+        "rdpRuleName": "allowrdp",
+        "rdpRuleProtocol": "Tcp",
+        "rdpRulePortRange": "3389",
+        "sshRuleName": "allowssh",
+        "sshRuleProtocol": "Tcp",
+        "sshRulePortRange": "22",
+        "windowsVMNames": "felixwindows",
+        "linuxVMNames": "felixlinux",
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+                "publicKeys": [
+                    {
+                    "path": "[concat('/home/', parameters('linuxAdminUsername'), '/.ssh/authorized_keys')]",
+                    "keyData": "[parameters('linuxAdminPassword')]"
+                    }
+                ]
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2022-07-01",
+            "name": "[parameters('vnetName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnetAddressPrefix')]"
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2022-07-01",
+            "name": "[concat(parameters('vnetName'), '/', parameters('subnetName'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            ],
+            "properties": {
+                "addressPrefix": "[parameters('subnetPrefix')]",
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2022-07-01",
+            "name": "[parameters('nsgName')]",
+            "location": "[parameters('location')]",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2022-07-01",
+            "name": "[concat(parameters('nsgName'), '/',concat(variables('rdpRuleName'), copyIndex(), '-rule'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+            ],
+            "copy": {
+                "name": "sourceaddressrdp",
+                "count": "[length(parameters('rdpSourceIPAddresses'))]"
+            },
+            "properties": {
+                "priority": "[add(variables('rdpRulePriority'), copyIndex())]",
+                "protocol": "[variables('rdpRuleProtocol')]",
+                "access": "Allow",
+                "direction": "Inbound",
+                "sourceAddressPrefixes": [
+                    "[concat(parameters('rdpSourceIPAddresses')[copyIndex()])]"
+                ],
+                "sourcePortRange": "*",
+                "destinationAddressPrefix": "*",
+                "destinationPortRange": "[variables('rdpRulePortRange')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2022-07-01",
+            "name": "[concat(parameters('nsgName'), '/',concat(variables('sshRuleName'), copyIndex(), '-rule'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+            ],
+            "copy": {
+                "name": "sourceaddressssh",
+                "count": "[length(parameters('sshSourceIPAddresses'))]"
+            },
+            "properties": {
+                "priority": "[add(variables('sshRulePriority'), copyIndex())]",
+                "protocol": "[variables('sshRuleProtocol')]",
+                "access": "Allow",
+                "direction": "Inbound",
+                "sourceAddressPrefixes": [
+                    "[concat(parameters('sshSourceIPAddresses')[copyIndex()])]"
+                ],
+                "sourcePortRange": "*",
+                "destinationAddressPrefix": "*",
+                "destinationPortRange": "[variables('sshRulePortRange')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2022-07-01",
+            "name": "[concat(variables('windowsVMNames'), copyIndex(), '-pip')]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "windowsPublicIpLoop",
+                "count": "[parameters('numberOfWindowsVMs')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[concat('felixwin', copyIndex(), 'vm')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2022-07-01",
+            "name": "[concat(variables('linuxVMNames'), copyIndex(), '-pip')]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "linuxPublicIpLoop",
+                "count": "[parameters('numberOfLinuxVMs')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[concat('felixlin', copyIndex(), 'vm')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2022-07-01",
+            "name": "[concat(variables('windowsVMNames'), copyIndex(), '-nic')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('windowsVMNames'), copyIndex(), '-pip'))]"
+            ],
+            "copy": {
+                "name": "windowsNicLoop",
+                "count": "[parameters('numberOfWindowsVMs')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('windowsVMNames'), copyIndex(), '-pip'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2022-07-01",
+            "name": "[concat(variables('linuxVMNames'), copyIndex(), '-nic')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('linuxVMNames'), copyIndex(), '-pip'))]"
+            ],
+            "copy": {
+                "name": "linuxNicLoop",
+                "count": "[parameters('numberOfLinuxVMs')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('linuxVMNames'), copyIndex(), '-pip'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2022-08-01",
+            "name": "[concat(variables('windowsVMNames'), copyIndex())]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('windowsVMNames'), copyIndex(), '-nic')]"
+            ],
+            "copy": {
+                "name": "windowsVMLoop",
+                "count": "[parameters('numberOfWindowsVMs')]"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[concat(variables('windowsVMNames'), copyIndex())]",
+                    "adminUsername": "[parameters('windowsAdminUsername')]",
+                    "adminPassword": "[parameters('windowsAdminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('windowsVMNames'), copyIndex(), '-nic'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2022-08-01",
+            "name": "[concat(variables('linuxVMNames'), copyIndex())]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('linuxVMNames'), copyIndex(), '-nic')]"
+            ],
+            "copy": {
+                "name": "linuxVMLoop",
+                "count": "[parameters('numberOfLinuxVMs')]"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[concat(variables('linuxVMNames'), copyIndex())]",
+                    "adminUsername": "[parameters('linuxAdminUsername')]",
+                    "adminPassword": "[parameters('linuxAdminPassword')]",
+                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "18.04-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('linuxVMNames'), copyIndex(), '-nic'))]"
+                        }
+                    ]
+                }
+            }           
+        }
+    ]
+}

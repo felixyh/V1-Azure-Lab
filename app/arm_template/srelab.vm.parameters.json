@@ -1,0 +1,48 @@
+{
+    "vnetName": {
+        "value": "test-vnet"
+    },
+    "subnetName": {
+        "value": "test-sn"
+    },
+    "subnetPrefix": {
+        "value": "10.0.1.0/24"
+    },
+    "nsgName": {
+        "value": "test-nsg"
+    },
+    "numberOfWindowsVMs": {
+        "value": 1
+    },
+    "numberOfLinuxVMs": {
+        "value": 1
+    },
+    "vmSize": {
+        "value": "Standard_B2s"
+    },
+    "windowsAdminUsername": {
+        "value": "felixyh"
+    },
+    "windowsAdminPassword": {
+        "value": "P@ssw0rd200117"
+    },
+    "linuxAdminUsername": {
+        "value": "felixyh"
+    },
+    "linuxAdminPassword": {
+        "value": "P@ssw0rd200117"
+    },
+    "sshSourceIPAddresses": {
+        "value": [
+            "99.155.67.149"
+        ]
+    },
+    "rdpSourceIPAddresses": {
+        "value": [
+            "99.155.67.149"
+        ]
+    },
+    "authenticationType": {
+        "value": "password"
+    }
+}
