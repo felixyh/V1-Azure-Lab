@@ -1,104 +1,105 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <h1 class="text-center mb-4">Deploy Virtual Machines with ARM Template</h1>
-            <form method="POST" action="{{ url_for('deploy') }}">
-                <div class="form-group">
-                    <label for="vnet_name">Virtual Network Name:</label>
-                    <input type="text" class="form-control" id="vnet_name" name="vnet_name" value="" required>
-                    <small class="form-text text-muted">Enter a name for the virtual network.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="subnet_name">Subnet Name:</label>
-                    <input type="text" class="form-control" id="subnet_name" name="subnet_name" value="" required>
-                    <small class="form-text text-muted">Enter a name for the subnet.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="subnet_prefix">Subnet Prefix:</label>
-                    <input type="text" class="form-control" id="subnet_prefix" name="subnet_prefix" value="" required>
-                    <small class="form-text text-muted">Enter the prefix for the subnet in CIDR notation (e.g. 10.0.1.0/24).</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="nsg_name">Network Security Group Name:</label>
-                    <input type="text" class="form-control" id="nsg_name" name="nsg_name" value="" required>
-                    <small class="form-text text-muted">Enter a name for the network security group.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="num_windows_vms">Number of Windows Virtual Machines:</label>
-                    <input type="number" class="form-control" id="num_windows_vms" name="num_windows_vms" value="0" min="0" max="10" required>
-                    <small class="form-text text-muted mt-1">Enter the number of Windows virtual machines to deploy.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="num_linux_vms">Number of Linux Virtual Machines:</label>
-                    <input type="number" class="form-control" id="num_linux_vms" name="num_linux_vms" value="0" min="0" max="10" required>
-                    <small class="form-text text-muted mt-1">Enter the number of Linux virtual machines to deploy.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="vm_size">Virtual Machine Size:</label>
-                    <select class="form-control" id="vm_size" name="vm_size" required>
-                        <option value="Standard_B1ls">Standard_B1ls</option>
-                        <option value="Standard_B1s">Standard_B1s</option>
-                        <option value="Standard_B2ms">Standard_B2ms</option>
-                        <option value="Standard_B2s" selected>Standard_B2s</option>
-                    </select>
-                    <small class="form-text text-muted">Select the size of the virtual machine.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="windows_admin_username">Windows Admin Username:</label>
-                    <input type="text" class="form-control" id="windows_admin_username" name="windows_admin_username" value="" required>
-                    <small class="form-text text-muted">Enter the admin username for the Windows virtual machines.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="windows_admin_password">Windows Admin Password:</label>
-                    <input type="password" class="form-control" id="windows_admin_password" name="windows_admin_password" value="" required>
-                    <small class="form-text text-muted">Enter the admin password for the Windows virtual machines.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="linux_admin_username">Linux Admin Username:</label>
-                    <input type="text" class="form-control" id="linux_admin_username" name="linux_admin_username" value="" required>
-                    <small class="form-text text-muted">Enter the admin username for the Linux virtual machines.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="linux_admin_password">Linux Admin Password:</label>
-                    <input type="password" class="form-control" id="linux_admin_password" name="linux_admin_password" value="" required>
-                    <small class="form-text text-muted">Enter the admin password for the Linux virtual machines.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="ssh_source_ips">SSH Source IP Addresses:</label>
-                    <input type="text" class="form-control" id="ssh_source_ips" name="ssh_source_ips" value="" required>
-                    <small class="form-text text-muted">Enter the allowed source IP addresses for SSH as a comma-separated list.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="rdp_source_ips">RDP Source IP Addresses:</label>
-                    <input type="text" class="form-control" id="rdp_source_ips" name="rdp_source_ips" value="" required>
-                    <small class="form-text text-muted">Enter the allowed source IP addresses for RDP as a comma-separated list.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="authentication_type">Authentication Type:</label>
-                    <select class="form-control" id="authentication_type" name="authentication_type" required>
-                        <option value="sshPublicKey" selected>SSH Public Key</option>
-                        <option value="password">Password</option>
-                    </select>
-                    <small class="form-text text-muted">Select the type of authentication to use on the virtual machine.</small>
-                </div>
-
-                <button type="submit" class="btn btn-primary mt-3">Deploy</button>
-            </form>
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <h1 class="text-center mb-4">Deploy Virtual Machines with ARM Template</h1>
+      <form method="POST" action="{{ url_for('deploy') }}">
+        <div class="form-group">
+          <label for="vnet_name">Virtual Network Name:</label>
+          <input type="text" class="form-control" id="vnet_name" name="vnet_name" placeholder="Enter a name for the virtual network" required>
         </div>
+        <p></p>
+        <div class="form-group">
+          <label for="subnet_name">Subnet Name:</label>
+          <input type="text" class="form-control" id="subnet_name" name="subnet_name" placeholder="Enter a name for the subnet" required>
+        </div>
+        <p></p>
+
+
+        <div class="form-group">
+          <label for="subnet_prefix">Subnet Prefix:</label>
+          <input type="text" class="form-control" id="subnet_prefix" name="subnet_prefix" placeholder="Enter the subnet prefix in CIDR notation (e.g. 10.0.1.0/24)" required>
+        </div>
+        <p></p>
+
+        <div class="form-group">
+          <label for="nsg_name">Network Security Group Name:</label>
+          <input type="text" class="form-control" id="nsg_name" name="nsg_name" placeholder="Enter a name for the network security group" required>
+        </div>
+        <p></p>
+
+        <div class="form-group">
+          <label for="num_windows_vms">Number of Windows Virtual Machines:</label>
+          <input type="number" class="form-control" id="num_windows_vms" name="num_windows_vms" value="0" min="0" max="10" required>
+        </div>
+        <p></p>
+
+        <div class="form-group">
+          <label for="num_linux_vms">Number of Linux Virtual Machines:</label>
+          <input type="number" class="form-control" id="num_linux_vms" name="num_linux_vms" value="0" min="0" max="10" required>
+        </div>
+        <p></p>
+
+        <div class="form-group">
+          <label for="vm_size">Virtual Machine Size:</label>
+          <select class="form-control" id="vm_size" name="vm_size" required>
+            <option value="Standard_B1ls">Standard_B1ls</option>
+            <option value="Standard_B1s">Standard_B1s</option>
+            <option value="Standard_B2ms">Standard_B2ms</option>
+            <option value="Standard_B2s" selected>Standard_B2s</option>
+          </select>
+        </div>
+        <p></p>
+
+        <div class="form-group">
+          <label for="windows_admin_username">Windows Admin Username:</label>
+          <input type="text" class="form-control" id="windows_admin_username" name="windows_admin_username" placeholder="Enter the admin username for the Windows virtual machines" required>
+        </div>
+        <p></p>
+
+        <div class="form-group">
+          <label for="windows_admin_password">Windows Admin Password:</label>
+          <input type="password" class="form-control" id="windows_admin_password" name="windows_admin_password" placeholder="Enter the admin password for the Windows virtual machines" required>
+        </div>
+        <p></p>
+
+        <div class="form-group">
+          <label for="linux_admin_username">Linux Admin Username:</label>
+          <input type="text" class="form-control" id="linux_admin_username" name="linux_admin_username" placeholder="Enter the admin username for the Linux virtual machines" required>
+        </div>
+        <p></p>
+
+        <div class="form-group">
+          <label for="linux_admin_password">Linux Admin Password:</label>
+          <input type="password" class="form-control" id="linux_admin_password" name="linux_admin_password" placeholder="Enter the admin password for the Linux virtual machines" required>
+        </div>
+        <p></p>
+
+        <div class="form-group">
+          <label for="ssh_source_ips">SSH Source IP Addresses:</label>
+          <input type="text" class="form-control" id="ssh_source_ips" name="ssh_source_ips" placeholder="Enter the allowed source IP addresses for SSH as a comma-separated list" required>
+        </div>
+        <p></p>
+
+        <div class="form-group">
+          <label for="rdp_source_ips">RDP Source IP Addresses:</label>
+          <input type="text" class="form-control" id="rdp_source_ips" name="rdp_source_ips" placeholder="Enter the allowed source IP addresses for RDP as a comma-separated list" required>
+        </div>
+        <p></p>
+
+        <div class="form-group">
+          <label for="authentication_type">Authentication Type:</label>
+          <select class="form-control" id="authentication_type" name="authentication_type" required>
+            <option value="sshPublicKey" >SSH Public Key</option>
+            <option value="password" selected>Password</option>
+          </select>
+        </div>
+        <p></p>
+
+        <button type="submit" class="btn btn-primary mr-3" name="action" value="save">Save</button>
+        <button type="submit" class="btn btn-primary" name="action" value="deploy">Deploy</button>
+      </form>
     </div>
+  </div>
 {% endblock %}

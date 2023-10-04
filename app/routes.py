@@ -62,9 +62,6 @@ def deploy():
         with open(parameters_path, "w") as file:
             json.dump(parameters, file, indent=4)
 
-        # Return a success message
-        return 'Deployment parameters written to srelab.vm.json.parameters.json file.'
-
         credentials = ClientSecretCredential(
             # client_id=os.environ['AZURE_CLIENT_ID'],
             # client_secret=os.environ['AZURE_CLIENT_SECRET'],
@@ -74,12 +71,9 @@ def deploy():
             tenant_id=AZURE_TENANT_ID
         )
 
-        # resource_client = ResourceManagementClient(credentials, os.environ['AZURE_SUBSCRIPTION_ID'])
-        # compute_client = ComputeManagementClient(credentials, os.environ['AZURE_SUBSCRIPTION_ID'])
         resource_client = ResourceManagementClient(credentials, AZURE_SUBSCRIPTION_ID)
 
         # compute_client = ComputeManagementClient(credentials, AZURE_SUBSCRIPTION_ID)
-
 
         template_path = os.path.join(os.getcwd(), 'app', 'arm_template', 'srelab.vm.json')
         with open(template_path, 'r') as template_file:
