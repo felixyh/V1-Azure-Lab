@@ -1,9 +1,9 @@
 {
     "vnetName": {
-        "value": "test-vnet"
+        "value": "test-vnet-1"
     },
     "subnetName": {
-        "value": "test-sn"
+        "value": "test-sn-1"
     },
     "subnetPrefix": {
         "value": "10.0.1.0/24"
@@ -18,28 +18,28 @@
         "value": 1
     },
     "vmSize": {
-        "value": "Standard_B2s"
+        "value": "Standard_B1ls"
     },
     "windowsAdminUsername": {
         "value": "felixyh"
     },
     "windowsAdminPassword": {
-        "value": "P@ssw0rd200117"
+        "value": "P@ssw0rd201017"
     },
     "linuxAdminUsername": {
         "value": "felixyh"
     },
     "linuxAdminPassword": {
-        "value": "P@ssw0rd200117"
+        "value": "P@ssword200117"
     },
     "sshSourceIPAddresses": {
         "value": [
-            "99.155.67.149"
+            "4.71.171.82"
         ]
     },
     "rdpSourceIPAddresses": {
         "value": [
-            "99.155.67.149"
+            "4.71.171.82"
         ]
     },
     "authenticationType": {

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <h1 class="text-center mb-4">Deployment Status</h1>
+      <h3 class="text-center mb-4" id="status"></h3>
+      <p class="text-center mb-4" id="timer"></p>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    var source = new EventSource("/deploy_status_stream");
+    var timerEl = document.getElementById("timer");
+    var startTime = Date.now();
+
+    source.onmessage = function(event) {
+      var status = event.data;
+      console.log(status);
+      document.getElementById("status").innerHTML = status;
+
+      if (status === "Succeeded" || status === "Failed" || status === "Canceled") {
+        clearInterval(timer);
+        window.location.href = "/result";
+      }
+    };
+
+    var timer = setInterval(function() {
+      var elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+      timerEl.innerHTML = "Deployment time: " + elapsedSeconds + " seconds";
+    }, 1000);
+  </script>
+{% endblock %}

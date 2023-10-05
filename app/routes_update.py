@@ -4,7 +4,7 @@ from azure.identity import ClientSecretCredential
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.resource.resources.models import Deployment, DeploymentMode, DeploymentProperties
 from msrestazure.azure_exceptions import CloudError
-from flask import Flask, render_template, request, redirect, url_for, jsonify, Response, stream_with_context
+from flask import Flask, render_template, request, redirect, url_for, jsonify, Response, stream_with_context, flash
 from datetime import datetime
 import json
 
@@ -18,6 +18,7 @@ AZURE_SUBSCRIPTION_ID = "6b892183-b95d-42e5-b659-fa2bef8f11f7"
 deployment_name = "flasksre"
 resource_group = "felixRG"
 
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 @app.route("/")
 def index():
@@ -26,6 +27,7 @@ def index():
 
 @app.route("/deploy", methods=["GET", "POST"])
 def deploy():
+
     if request.method == "POST":
         if request.form["action"] == "save":
             vnet_name = request.form["vnet_name"]
@@ -65,8 +67,11 @@ def deploy():
             )
             with open(parameters_path, "w") as file:
                 json.dump(parameters, file, indent=4)
+            flash('Parameters saved successfully!', 'success')
 
             return redirect(url_for("deploy"))
+        ####### Start the deployment if deploy button clicked #####
+
         else:
             parameters_path = os.path.join(
                 os.getcwd(), "app", "arm_template", "srelab.vm.parameters.json"
@@ -118,7 +123,37 @@ def deploy():
                 print(f"Deployment failed with error message: {ex}")
                 return render_template('deploy.html', Warning=f"Deployment failed with error message: {ex}")
 
-    return render_template("deploy.html")
+
+    #### If it is not POST request, will just show the page with GET      
+
+    parameters_path = os.path.join(os.getcwd(), "app", "arm_template", "srelab.vm.parameters.json")
+
+
+    parameters_mapping = {
+        "vnet_name": "vnetName",
+        "subnet_name": "subnetName",
+        "subnet_prefix": "subnetPrefix",
+        "nsg_name": "nsgName",
+        "num_windows_vms": "numberOfWindowsVMs",
+        "num_linux_vms": "numberOfLinuxVMs",
+        "vm_size": "vmSize",
+        "windows_admin_username": "windowsAdminUsername",
+        "windows_admin_password": "windowsAdminPassword",
+        "linux_admin_username": "linuxAdminUsername",
+        "linux_admin_password": "linuxAdminPassword",
+        "ssh_source_ips": "sshSourceIPAddresses",
+        "rdp_source_ips": "rdpSourceIPAddresses",
+        "authentication_type": "authenticationType"
+    }
+
+    try:
+        with open(parameters_path, "r") as parameters_file:
+                parameters_dict = json.load(parameters_file)
+    except FileNotFoundError:
+        parameters_dict = {}
+        parameters_mapping = {}
+
+    return render_template("deploy.html", parameters_mapping=parameters_mapping, parameters_dict=parameters_dict, )
 
 
 def stream_deployment_status(deployment_async_operation):

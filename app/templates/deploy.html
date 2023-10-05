@@ -1,5 +1,15 @@
 {% extends 'base.html' %}
 
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
 {% block content %}
   <div class="row">
     <div class="col-md-6 offset-md-3">
@@ -7,92 +17,99 @@
       <form method="POST" action="{{ url_for('deploy') }}">
         <div class="form-group">
           <label for="vnet_name">Virtual Network Name:</label>
-          <input type="text" class="form-control" id="vnet_name" name="vnet_name" placeholder="Enter a name for the virtual network" required>
+          <input type="text" class="form-control" id="vnet_name" name="vnet_name" {% if 'vnet_name' in parameters_mapping %} value="{{ parameters_dict[parameters_mapping['vnet_name']]['value'] }}" {% endif %} placeholder="Enter a name for the virtual network" required>
         </div>
         <p></p>
         <div class="form-group">
           <label for="subnet_name">Subnet Name:</label>
-          <input type="text" class="form-control" id="subnet_name" name="subnet_name" placeholder="Enter a name for the subnet" required>
+          <input type="text" class="form-control" id="subnet_name" name="subnet_name" {% if 'subnet_name' in parameters_mapping %} value="{{ parameters_dict[parameters_mapping['subnet_name']]['value'] }}" {% endif %} placeholder="Enter a name for the subnet" required>
         </div>
         <p></p>
 
-
         <div class="form-group">
           <label for="subnet_prefix">Subnet Prefix:</label>
-          <input type="text" class="form-control" id="subnet_prefix" name="subnet_prefix" placeholder="Enter the subnet prefix in CIDR notation (e.g. 10.0.1.0/24)" required>
+          <input type="text" class="form-control" id="subnet_prefix" name="subnet_prefix" {% if 'subnet_prefix' in parameters_mapping %} value="{{ parameters_dict[parameters_mapping['subnet_prefix']]['value'] }}" {% endif %} placeholder="Enter the subnet prefix in CIDR notation (e.g. 10.0.1.0/24)" required>
         </div>
         <p></p>
 
         <div class="form-group">
           <label for="nsg_name">Network Security Group Name:</label>
-          <input type="text" class="form-control" id="nsg_name" name="nsg_name" placeholder="Enter a name for the network security group" required>
+          <input type="text" class="form-control" id="nsg_name" name="nsg_name" {% if 'nsg_name' in parameters_mapping %} value="{{ parameters_dict[parameters_mapping['nsg_name']]['value'] }}" {% endif %} placeholder="Enter a name for the network security group" required>
         </div>
         <p></p>
 
         <div class="form-group">
           <label for="num_windows_vms">Number of Windows Virtual Machines:</label>
-          <input type="number" class="form-control" id="num_windows_vms" name="num_windows_vms" value="0" min="0" max="10" required>
+          <input type="number" class="form-control" id="num_windows_vms" name="num_windows_vms" {% if 'num_windows_vms' in parameters_mapping %} value="{{ parameters_dict[parameters_mapping['num_windows_vms']]['value'] }}" {% endif %} min="0" max="10" required>
         </div>
         <p></p>
 
         <div class="form-group">
           <label for="num_linux_vms">Number of Linux Virtual Machines:</label>
-          <input type="number" class="form-control" id="num_linux_vms" name="num_linux_vms" value="0" min="0" max="10" required>
+          <input type="number" class="form-control" id="num_linux_vms" name="num_linux_vms" {% if 'num_linux_vms' in parameters_mapping %} value="{{ parameters_dict[parameters_mapping['num_linux_vms']]['value'] }}" {% endif %} min="0" max="10" required>
         </div>
         <p></p>
 
         <div class="form-group">
           <label for="vm_size">Virtual Machine Size:</label>
           <select class="form-control" id="vm_size" name="vm_size" required>
-            <option value="Standard_B1ls">Standard_B1ls</option>
-            <option value="Standard_B1s">Standard_B1s</option>
-            <option value="Standard_B2ms">Standard_B2ms</option>
-            <option value="Standard_B2s" selected>Standard_B2s</option>
+            {% for option in ['Standard_B1ls', 'Standard_B1s', 'Standard_B2ms', 'Standard_B2s'] %}
+              {% if 'vm_size' in parameters_mapping and parameters_dict[parameters_mapping['vm_size']]['value'] == option %}
+                <option value="{{ option }}" selected>{{ option }}</option>
+              {% else %}
+                <option value="{{ option }}">{{ option }}</option>
+              {% endif %}
+            {% endfor %}
           </select>
         </div>
         <p></p>
 
         <div class="form-group">
           <label for="windows_admin_username">Windows Admin Username:</label>
-          <input type="text" class="form-control" id="windows_admin_username" name="windows_admin_username" placeholder="Enter the admin username for the Windows virtual machines" required>
+          <input type="text" class="form-control" id="windows_admin_username" name="windows_admin_username" {% if 'windows_admin_username' in parameters_mapping %} value="{{ parameters_dict[parameters_mapping['windows_admin_username']]['value'] }}" {% endif %} placeholder="Enter the admin username for the Windows virtual machines" required>
         </div>
         <p></p>
 
         <div class="form-group">
           <label for="windows_admin_password">Windows Admin Password:</label>
-          <input type="password" class="form-control" id="windows_admin_password" name="windows_admin_password" placeholder="Enter the admin password for the Windows virtual machines" required>
+          <input type="password" class="form-control" id="windows_admin_password" name="windows_admin_password" value="" placeholder="Enter the admin password for the Windows virtual machines" required>
         </div>
         <p></p>
 
         <div class="form-group">
           <label for="linux_admin_username">Linux Admin Username:</label>
-          <input type="text" class="form-control" id="linux_admin_username" name="linux_admin_username" placeholder="Enter the admin username for the Linux virtual machines" required>
+          <input type="text" class="form-control" id="linux_admin_username" name="linux_admin_username" {% if 'linux_admin_username' in parameters_mapping %} value="{{ parameters_dict[parameters_mapping['linux_admin_username']]['value'] }}" {% endif %} placeholder="Enter the admin username for the Linux virtual machines" required>
         </div>
         <p></p>
 
         <div class="form-group">
           <label for="linux_admin_password">Linux Admin Password:</label>
-          <input type="password" class="form-control" id="linux_admin_password" name="linux_admin_password" placeholder="Enter the admin password for the Linux virtual machines" required>
+          <input type="password" class="form-control" id="linux_admin_password" name="linux_admin_password" value="" placeholder="Enter the admin password for the Linux virtual machines" required>
         </div>
         <p></p>
 
         <div class="form-group">
           <label for="ssh_source_ips">SSH Source IP Addresses:</label>
-          <input type="text" class="form-control" id="ssh_source_ips" name="ssh_source_ips" placeholder="Enter the allowed source IP addresses for SSH as a comma-separated list" required>
+          <input type="text" class="form-control" id="ssh_source_ips" name="ssh_source_ips" {% if 'ssh_source_ips' in parameters_mapping %} value="{{ parameters_dict[parameters_mapping['ssh_source_ips']]['value'][0] }}" {% endif %} placeholder="Enter the allowed source IP addresses for SSH as a comma-separated list" required>
         </div>
         <p></p>
 
         <div class="form-group">
           <label for="rdp_source_ips">RDP Source IP Addresses:</label>
-          <input type="text" class="form-control" id="rdp_source_ips" name="rdp_source_ips" placeholder="Enter the allowed source IP addresses for RDP as a comma-separated list" required>
+          <input type="text" class="form-control" id="rdp_source_ips" name="rdp_source_ips" {% if 'rdp_source_ips' in parameters_mapping %} value="{{ parameters_dict[parameters_mapping['rdp_source_ips']]['value'][0] }}" {% endif %} placeholder="Enter the allowed source IP addresses for RDP as a comma-separated list" required>
         </div>
         <p></p>
 
         <div class="form-group">
           <label for="authentication_type">Authentication Type:</label>
           <select class="form-control" id="authentication_type" name="authentication_type" required>
-            <option value="sshPublicKey" >SSH Public Key</option>
-            <option value="password" selected>Password</option>
+            {% for option in ['sshPublicKey', 'password'] %}
+              {% if 'authentication_type' in parameters_mapping and parameters_dict[parameters_mapping['authentication_type']]['value'] == option %}
+                <option value="{{ option }}" selected>{{ option }}</option>
+              {% else %}
+                <option value="{{ option }}">{{ option }}</option>
+              {% endif %}
+            {% endfor %}
           </select>
         </div>
         <p></p>
