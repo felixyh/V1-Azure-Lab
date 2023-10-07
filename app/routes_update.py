@@ -150,37 +150,6 @@ def deploy():
     return render_template("deploy.html", parameters_mapping=parameters_mapping, parameters_dict=parameters_dict, )
 
 
-# def stream_deployment_status(deployment):
-#     while True:
-
-#         status = deployment.properties.provisioning_state
-
-#         if status == "Succeeded":
-#             break
-#         elif (
-#             status == "Canceled"
-#             or status == "Failed"
-#         ):
-#             yield f"data: {deployment.properties.provisioning_state}\n\n"
-#             break
-#         else:
-#             yield f"data: {deployment.properties.provisioning_state}\n\n"
-#         time.sleep(5)
-
-#         # deployment = deployment_async_operation.result()
-#         # if deployment.properties.provisioning_state == "Succeeded":
-#         #     break
-#         # elif (
-#         #     deployment.properties.provisioning_state == "Canceled"
-#         #     or deployment.properties.provisioning_state == "Failed"
-#         # ):
-#         #     yield f"data: {deployment.properties.provisioning_state}\n\n"
-#         #     break
-#         # else:
-#         #     yield f"data: {deployment.properties.provisioning_state}\n\n"
-#         # time.sleep(5)
-
-
 @app.route("/deploy_status_stream")
 def deploy_status_stream():
     def stream():
@@ -212,30 +181,6 @@ def deploy_status_stream():
 
     return Response(stream(), mimetype="text/event-stream")
 
-
-
-# @app.route("/deploy_status_stream")
-# def deploy_status_stream():
-#     credentials = ClientSecretCredential(
-#             client_id=AZURE_CLIENT_ID,
-#             client_secret=AZURE_CLIENT_SECRET,
-#             tenant_id=AZURE_TENANT_ID,
-#         )
-
-#     resource_client = ResourceManagementClient(
-#         credentials, AZURE_SUBSCRIPTION_ID
-#     )
-
-#     deployment = resource_client.deployments.get(
-#         resource_group_name=resource_group, deployment_name=deployment_name
-#     )
-
-#     return Response(
-#         stream_with_context(
-#             stream_deployment_status(deployment=deployment)
-#         ),
-#         mimetype="text/event-stream",
-#     )
 
 
 @app.route("/deploy_status")
