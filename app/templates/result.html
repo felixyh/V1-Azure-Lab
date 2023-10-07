@@ -1,16 +1,30 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="row">
-    <div class="col-md-6 offset-md-3">
-      <h1 class="text-center mb-4">Deployment Result</h1>
-      <h3 class="text-center mb-4">{{ status }}</h3>
-      {% if output %}
-        <pre>{{ output | tojson | safe }}</pre>
-      {% else %}
-        <p class="text-center">No output available.</p>
-      {% endif %}
-      <p class="text-center mt-4"><a href="/" class="btn btn-primary">Return to Home</a></p>
-    </div>
-  </div>
+  <h1>Deployment Result</h1>
+  <p>Deployment status: <span id="status">{{ status }}</span></p>
+  <p>Deployment time: {{ elapsed_time }} seconds</p>
+
+  <h2>Resources Deployed</h2>
+    {% if output == None %}
+      <p>There's no resource ouuput or not defined</p>
+    {% else %}
+    <ul>
+      {% for key, value in output.items() %}
+        <li>{{ key }}: {{ value.value }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    var status = document.getElementById("status").textContent;
+    if (status === "Succeeded") {
+      document.body.style.backgroundColor = "#c2f0c2";
+    } else {
+      document.body.style.backgroundColor = "#ffb3b3";
+    }
+  </script>
 {% endblock %}

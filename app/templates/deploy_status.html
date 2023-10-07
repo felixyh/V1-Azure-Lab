@@ -21,7 +21,8 @@
       console.log(status);
       document.getElementById("status").innerHTML = status;
 
-      if (status === "Succeeded" || status === "Failed" || status === "Canceled") {
+      // if (status === "Succeeded" || status === "Failed" || status === "Canceled") {
+      if (status == "Succeeded" || status == "Failed" || status == "Canceled") {
         clearInterval(timer);
         window.location.href = "/result";
       }

@@ -1,19 +1,21 @@
 {% extends 'base.html' %}
 
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class=flashes>
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+{% block flash %}
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+              <li class="{{ message[0] }}">{{ message[1] }}</li>
+          {% endfor %}
+        </ul>
+    {% endif %}
+  {% endwith %}
+{% endblock %}
 
 {% block content %}
   <div class="row">
     <div class="col-md-6 offset-md-3">
-      <h1 class="text-center mb-4">Deploy Virtual Machines with ARM Template</h1>
+      <h1 class="text-center mb-4">Deploy Basic Lab Environment with ARM Template</h1>
       <form method="POST" action="{{ url_for('deploy') }}">
         <div class="form-group">
           <label for="vnet_name">Virtual Network Name:</label>

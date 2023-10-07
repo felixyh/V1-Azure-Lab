@@ -4,7 +4,7 @@ from azure.identity import ClientSecretCredential
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.resource.resources.models import Deployment, DeploymentMode, DeploymentProperties
 from msrestazure.azure_exceptions import CloudError
-from flask import Flask, render_template, request, redirect, url_for, jsonify, Response, stream_with_context, flash
+from flask import Flask, render_template, request, redirect, url_for, Response, stream_with_context, flash
 from datetime import datetime
 import json
 
@@ -67,21 +67,19 @@ def deploy():
             )
             with open(parameters_path, "w") as file:
                 json.dump(parameters, file, indent=4)
-            flash('Parameters saved successfully!', 'success')
+            # flash('Parameters saved successfully!', 'success')
 
             return redirect(url_for("deploy"))
+        
         ####### Start the deployment if deploy button clicked #####
-
         else:
             parameters_path = os.path.join(
                 os.getcwd(), "app", "arm_template", "srelab.vm.parameters.json"
             )
 
             if not os.path.isfile(parameters_path):
-                return render_template(
-                    "deploy.html",
-                    warning="Please save the parameters before deploying.",
-                )
+                flash('Please save the parameters before deploying.', 'warning')
+                return render_template('deploy.html')
 
             credentials = ClientSecretCredential(
                 client_id=AZURE_CLIENT_ID,
@@ -102,22 +100,20 @@ def deploy():
             parameters_path = os.path.join(
                 os.getcwd(), "app", "arm_template", "srelab.vm.parameters.json"
             )
+
             with open(parameters_path, "r") as parameters_file:
                 parameters_file = json.load(parameters_file)
-
             try:
                 deployment_properties = DeploymentProperties(
                     mode=DeploymentMode.incremental,
                     template=template_file,
                     parameters=parameters_file,
                 )
-
                 deployment_async_operation = resource_client.deployments.begin_create_or_update(
                     resource_group,
                     deployment_name,
                     Deployment(properties=deployment_properties),
                 )
-
                 return redirect(url_for("deploy_status"))
             except CloudError as ex:
                 print(f"Deployment failed with error message: {ex}")
@@ -125,9 +121,7 @@ def deploy():
 
 
     #### If it is not POST request, will just show the page with GET      
-
     parameters_path = os.path.join(os.getcwd(), "app", "arm_template", "srelab.vm.parameters.json")
-
 
     parameters_mapping = {
         "vnet_name": "vnetName",
@@ -156,46 +150,92 @@ def deploy():
     return render_template("deploy.html", parameters_mapping=parameters_mapping, parameters_dict=parameters_dict, )
 
 
-def stream_deployment_status(deployment_async_operation):
-    while True:
-        deployment = deployment_async_operation.result()
-        if deployment.properties.provisioning_state == "Succeeded":
-            break
-        elif (
-            deployment.properties.provisioning_state == "Canceled"
-            or deployment.properties.provisioning_state == "Failed"
-        ):
-            yield f"data: {deployment.properties.provisioning_state}\n\n"
-            break
-        else:
-            yield f"data: {deployment.properties.provisioning_state}\n\n"
-        time.sleep(5)
+# def stream_deployment_status(deployment):
+#     while True:
+
+#         status = deployment.properties.provisioning_state
+
+#         if status == "Succeeded":
+#             break
+#         elif (
+#             status == "Canceled"
+#             or status == "Failed"
+#         ):
+#             yield f"data: {deployment.properties.provisioning_state}\n\n"
+#             break
+#         else:
+#             yield f"data: {deployment.properties.provisioning_state}\n\n"
+#         time.sleep(5)
+
+#         # deployment = deployment_async_operation.result()
+#         # if deployment.properties.provisioning_state == "Succeeded":
+#         #     break
+#         # elif (
+#         #     deployment.properties.provisioning_state == "Canceled"
+#         #     or deployment.properties.provisioning_state == "Failed"
+#         # ):
+#         #     yield f"data: {deployment.properties.provisioning_state}\n\n"
+#         #     break
+#         # else:
+#         #     yield f"data: {deployment.properties.provisioning_state}\n\n"
+#         # time.sleep(5)
 
 
 @app.route("/deploy_status_stream")
 def deploy_status_stream():
-    credentials = ClientSecretCredential(
-        client_id=AZURE_CLIENT_ID,
-        client_secret=AZURE_CLIENT_SECRET,
-        tenant_id=AZURE_TENANT_ID,
-    )
+    def stream():
+        credentials = ClientSecretCredential(
+            client_id=AZURE_CLIENT_ID,
+            client_secret=AZURE_CLIENT_SECRET,
+            tenant_id=AZURE_TENANT_ID,
+        )
 
-    resource_client = ResourceManagementClient(
-        credentials, AZURE_SUBSCRIPTION_ID
-    )
+        resource_client = ResourceManagementClient(
+            credentials, AZURE_SUBSCRIPTION_ID
+        )
 
-    deployment_async_operation = resource_client.deployments.begin_create_or_update(
-        resource_group,
-        deployment_name,
-        Deployment(properties=DeploymentProperties(mode=DeploymentMode.incremental)),
-    )
+        deployment = resource_client.deployments.get(
+            resource_group_name=resource_group, deployment_name=deployment_name
+        )
 
-    return Response(
-        stream_with_context(
-            stream_deployment_status(deployment_async_operation)
-        ),
-        mimetype="text/event-stream",
-    )
+        while True:
+            status = deployment.properties.provisioning_state
+            yield f"data: {status}\n\n"
+
+            if status == "Succeeded" or status == "Failed" or status == "Canceled":
+                break
+
+            time.sleep(5)
+            deployment = resource_client.deployments.get(
+                resource_group_name=resource_group, deployment_name=deployment_name
+            )
+
+    return Response(stream(), mimetype="text/event-stream")
+
+
+
+# @app.route("/deploy_status_stream")
+# def deploy_status_stream():
+#     credentials = ClientSecretCredential(
+#             client_id=AZURE_CLIENT_ID,
+#             client_secret=AZURE_CLIENT_SECRET,
+#             tenant_id=AZURE_TENANT_ID,
+#         )
+
+#     resource_client = ResourceManagementClient(
+#         credentials, AZURE_SUBSCRIPTION_ID
+#     )
+
+#     deployment = resource_client.deployments.get(
+#         resource_group_name=resource_group, deployment_name=deployment_name
+#     )
+
+#     return Response(
+#         stream_with_context(
+#             stream_deployment_status(deployment=deployment)
+#         ),
+#         mimetype="text/event-stream",
+#     )
 
 
 @app.route("/deploy_status")
@@ -241,7 +281,9 @@ def result():
     status = deployment.properties.provisioning_state
     output = deployment.properties.outputs
 
-    return render_template("result.html", status=status, output=output)
+    elapsed_time = deployment.properties.duration
+
+    return render_template("result.html", status=status, output=output, elapsed_time=elapsed_time)
 
 
 if __name__ == "__main__":
