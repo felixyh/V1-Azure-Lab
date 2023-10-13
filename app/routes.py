@@ -10,10 +10,10 @@ import json
 
 app = Flask(__name__)
 
-AZURE_CLIENT_ID = "XXX"
-AZURE_CLIENT_SECRET = "XXX"
-AZURE_TENANT_ID = "XXX"
-AZURE_SUBSCRIPTION_ID = "XXX"
+AZURE_CLIENT_ID = os.getenv("AZURE_CLIENT_ID", default=None)
+AZURE_CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET", default=None)
+AZURE_TENANT_ID = os.getenv("AZURE_TENANT_ID", default=None)
+AZURE_SUBSCRIPTION_ID = os.getenv("AZURE_SUBSCRIPTION_ID", default=None)
 
 deployment_name = "flasksre"
 resource_group = "felixRG"
