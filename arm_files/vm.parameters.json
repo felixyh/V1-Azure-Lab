@@ -14,7 +14,7 @@
       "adminPasswordOrKey": {
         "reference": {
           "keyVault": {
-            "id": "/subscriptions/6b892183-b95d-42e5-b659-fa2bef8f11f7/resourceGroups/felixRg/providers/Microsoft.KeyVault/vaults/felixyh-keyvault",
+            "id": "/subscriptions/6b892183-b95d-42e5-b659-fa2bef8f11f7/resourceGroups/felixSRE/providers/Microsoft.KeyVault/vaults/felixyh-keyvault"
           },
           "secretName": "felixyh-ssh"
         }
