@@ -15,6 +15,7 @@ AZURE_CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET", default=None)
 AZURE_TENANT_ID = os.getenv("AZURE_TENANT_ID", default=None)
 AZURE_SUBSCRIPTION_ID = os.getenv("AZURE_SUBSCRIPTION_ID", default=None)
 
+
 deployment_name = "flasksre"
 resource_group = "felixRG"
 
@@ -147,7 +148,7 @@ def deploy():
         parameters_dict = {}
         parameters_mapping = {}
 
-    return render_template("deploy.html", parameters_mapping=parameters_mapping, parameters_dict=parameters_dict, )
+    return render_template("deploy.html", parameters_mapping=parameters_mapping, parameters_dict=parameters_dict)
 
 
 @app.route("/deploy_status_stream")
